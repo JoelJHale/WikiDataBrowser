@@ -7,9 +7,14 @@
   <link rel="stylesheet" href="styles.css">
   <title>Wiki Data Browser/Sites</title>
   <script>
-    fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData").then(
+    var myHeaders = new Headers()
+    myHeaders.append('My-Preflight-Header', 'Success?')
+    fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData",{method: 'GET', mode: 'cors', headers: myHeaders}).then(
         result => result.json().then(
-            jsonData => document.getElementById('text').innerText = jsonData
+            jsonData => {
+              console.log(result)
+              document.getElementById('text').innerText = jsonData
+            }
         ))
   </script>
 </head>
