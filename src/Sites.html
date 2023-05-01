@@ -14,7 +14,7 @@
             jsonData => {
               for (var id in jsonData)
               {
-                var newA = document.createElement('anchor')
+                var newA = document.createElement('a')
                 newA.textContent = jsonData[id].title
                 newA.href =  "SiteOptions.html/" + jsonData[id].link
                 document.getElementById('linkslist').appendChild(newA)
