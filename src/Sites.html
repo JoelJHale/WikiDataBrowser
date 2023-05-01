@@ -12,8 +12,7 @@
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData",{method: 'GET', mode: 'cors', headers: myHeaders}).then(
         result => result.json().then(
             jsonData => {
-              console.log(result)
-              document.getElementById('text').innerText = jsonData
+              document.getElementById('text').innerText = JSON.stringify(jsonData)
             }
         ))
   </script>
