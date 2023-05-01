@@ -16,10 +16,10 @@
               {
                 var newA = document.createElement('a')
                 newA.textContent = jsonData[id].title
-                newA.href =  "SiteOptions.html/" + jsonData[id].link
+                newA.href =  "SiteOptions.html?site=" + jsonData[id].link
                 document.getElementById('linkslist').appendChild(newA)
+                document.append('<br>')
               }
-              //document.getElementById('text').innerText = JSON.stringify(jsonData)
             }
         ))
   </script>
