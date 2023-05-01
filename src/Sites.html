@@ -12,7 +12,14 @@
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData",{method: 'GET', mode: 'cors', headers: myHeaders}).then(
         result => result.json().then(
             jsonData => {
-              document.getElementById('text').innerText = JSON.stringify(jsonData)
+              for (var id in jsonData)
+              {
+                var newA = document.createElement('anchor')
+                newA.textContent = jsonData[id].title
+                newA.href =  "SiteOptions.html/" + jsonData[id].link
+                document.getElementById('linkslist').appendChild(newA)
+              }
+              //document.getElementById('text').innerText = JSON.stringify(jsonData)
             }
         ))
   </script>
@@ -21,7 +28,7 @@
 <body>
   <main>
     <h1>Available sites: </h1>
-    <span id="text"></span>
+    <span id="linkslist"></span>
   </main>
 </body>
 
