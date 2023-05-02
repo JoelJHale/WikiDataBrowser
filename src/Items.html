@@ -6,11 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <title>Vanilla JavaScript App</title>
+  <script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const linkParam = urlParams.get('site');
+    const itemParam = urlParams.get('item');
+    document.getElementById('siteHead').append('Data for ' + itemParam + ' for the site ' + linkParam)
+    fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
+        result => result.json().then(
+            jsonData => {
+              var table = document.getElementById('itemTable')
+              for (var itemName in jsonData)
+              {
+                var row = document.createElement('tr')
+                var itemNameTH = document.createElement('th')
+                itemNameTH.className = 'itemRow'
+                itemNameTH.innerHTML = itemName
+                row.appendChild(itemNameTH)
+                for (var key in jsonData[itemName])
+                {
+                  var dataTD = document.createElement('td')
+                  dataTD.className = key
+                  dataTD.innerHTML = jsonData[itemName][key]
+                  row.appendChild(dataTD)
+                }
+                table.append(row)
+              }
+            }
+        ))
+  </script>
 </head>
 
 <body>
   <main>
-    <h1>Vanilla JavaScript App</h1>
+    <h1 id = "siteHead"></h1>
+    <table id="itemTable"></table>
   </main>
 </body>
 

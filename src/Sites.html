@@ -19,7 +19,7 @@
                 newA.textContent = jsonData[id].title
                 newA.href =  "SiteOptions.html?site=" + jsonData[id].link
                 span.appendChild(newA)
-                span.append('\r\n')
+                span.appendChild(document.createElement('br'))
               }
             }
         ))
