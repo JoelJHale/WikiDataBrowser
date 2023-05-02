@@ -10,7 +10,6 @@
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const linkParam = urlParams.get('site');
-    document.getElementById('siteHead').append(linkParam)
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
