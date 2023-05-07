@@ -5,13 +5,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
+  <title>Item Info</title>
   <script>
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const linkParam = urlParams.get('site');
     const itemParam = urlParams.get('item');
-    fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
+    var tableData = []
+    await fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
+        result => result.json().then(
+            jsonData => {
+              var option = jsonData.options[itemParam]
+              var table = document.getElementById('itemTable')
+              var row = document.createElement('tr')
+              var itemNameTH = document.createElement('th')
+              itemNameTH.className = 'itemColumn'
+              itemNameTH.innerHTML = 'Page'
+              for (var data_type in option.array_data)
+              {
+                var dataArray = option.array_data[data_type]
+                for (var key in dataArray)
+                {
+                  tableData.push(dataArray[key].displayName)
+                  var dataTH = document.createElement('th')
+                  dataTH.className = dataArray[key].displayName
+                  dataTH.innerHTML = dataArray[key].displayName
+                  row.appendChild(dataTH)
+                }
+                table.prepend(row)
+              }
+            }
+        ))
+    await fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
         result => result.json().then(
             jsonData => {
               var table = document.getElementById('itemTable')
@@ -19,14 +44,14 @@
               {
                 var row = document.createElement('tr')
                 var itemNameTH = document.createElement('th')
-                itemNameTH.className = 'itemRow'
+                itemNameTH.className = 'itemColumn'
                 itemNameTH.innerHTML = itemName
                 row.appendChild(itemNameTH)
-                for (var key in jsonData[itemName])
+                for (var key in tableData)
                 {
                   var dataTD = document.createElement('td')
-                  dataTD.className = key
-                  dataTD.innerHTML = jsonData[itemName][key]
+                  dataTD.className = tableData[key]
+                  dataTD.innerHTML = jsonData[itemName][tableData[key]]
                   row.appendChild(dataTD)
                 }
                 table.append(row)
