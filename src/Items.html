@@ -12,7 +12,7 @@
     const linkParam = urlParams.get('site');
     const itemParam = urlParams.get('item');
     var tableData = []
-    await fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
+    fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
               var option = jsonData.options[itemParam]
@@ -36,7 +36,8 @@
               }
             }
         ))
-    await fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
+    .then(
+      fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
         result => result.json().then(
             jsonData => {
               var table = document.getElementById('itemTable')
@@ -58,6 +59,8 @@
               }
             }
         ))
+        )
+    
   </script>
 </head>
 
