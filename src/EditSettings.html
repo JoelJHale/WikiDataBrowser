@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Editing Settings</title>
+  <script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const linkParam = urlParams.get('site');
+  </script>
+  <script src="SettingObject.js"></script>
+  <script>
+    var siteSettings
+    function UpdateAsideBox()
+    {
+        var panel = document.getElementById('object')
+        panel.innerText = "Setting Object\n" + JSON.stringify(siteSettings)
+    }
+    function Reveal(str)
+    {
+        document.getElementById(str).style.display = 'initial'  
+    }
+    async function SetLink()
+    {
+        var linkElem = document.getElementById('link')
+        var link = ""
+        link = linkElem.value
+        var httpsLoc = link.indexOf("https://")
+        var fandomLoc = link.indexOf(".fandom.com")
+        if (fandomLoc != -1) link = link.slice(0,fandomLoc)
+        if (httpsLoc != -1) link = link.slice(httpsLoc+8)
+        linkElem.value = link
+        try {
+            siteSettings = await Settings.Create(link)
+            document.getElementById('title').value = siteSettings.title
+            linkElem.disable = true
+            Reveal('titleSpan')
+            Reveal('options')
+            UpdateAsideBox()
+        }
+        catch (err)
+        {
+            alert("Link was invalid")
+            console.error(err)
+        }
+    }
+    function SetTitle()
+    {
+        siteSettings.SetTitle(value)
+        UpdateAsideBox()
+    }
+    function UpdateOptionsSelector()
+    {
+        var elem = document.getElementById('optionSelector')
+        var found = false
+        while (elem.options.length) elem.remove(0)
+        for (var option in siteSettings.options)
+        {
+            found = true
+            var optionElement = new Option(option, option)
+            elem.add(optionElement)
+        }
+        if (!found) document.getElementById('editOptions').style.display = 'none'
+    }
+    function AddOption()
+    {
+        var option = document.getElementById('optionName').value
+        var optionSource = document.getElementById('optionSource').value
+        var type = document.getElementById('optionType').value
+        var newOption = new Options
+        newOption.source_page = optionSource
+        newOption.source_type = type
+        siteSettings.options[option] = newOption
+        document.getElementById('editOptions').style.display = 'initial'
+        UpdateOptionsSelector()
+        UpdateAsideBox()
+    }
+    function RemoveOption()
+    {
+        var option = document.getElementById('optionSelector').value
+        delete siteSettings.options[option]
+        UpdateOptionsSelector()
+        UpdateAsideBox()
+
+    }
+    function RemoveDataOption()
+    {
+        var option = document.getElementById('optionSelector').value
+        var data = document.getElementById('displayName').value
+        var locationType = document.getElementById('dataLocationType').value
+        var locationArray = siteSettings.options[option].array_data[locationType]
+        if (locationArray == null) return
+        for (let i = locationArray.length-1; i>=0; i--)
+        {
+            if (locationArray[i].displayName == data) locationArray.splice(i, 1)
+        }
+        if (locationArray.length == 0) locationArray = null
+        UpdateAsideBox()
+    }
+    function AddDataOption()
+    {
+        var option = document.getElementById('optionSelector').value
+        var dataName = document.getElementById('displayName').value
+        var locationType = document.getElementById('dataLocationType').value
+        var location = document.getElementById('dataLocation').value
+        var required = document.getElementById('dataRequired').checked
+        var defaultValue = document.getElementById('dataDefault').value
+        var type = document.getElementById('dataType').value
+        
+        if (siteSettings.options[option].array_data[locationType] == null) siteSettings.options[option].array_data[locationType] = []
+
+        var dataOption = new Data()
+        dataOption.default = defaultValue
+        dataOption.displayName = dataName
+        dataOption.location = location
+        dataOption.required = required
+        dataOption.type = type
+
+        siteSettings.options[option].array_data[locationType].push(dataOption)
+        UpdateAsideBox()
+    }
+    ListSettings = 
+    {
+        Page_Links: {
+            APIAction: "action=parse&format=json&prop=links", 
+            APISource: "page",
+            List_Access: ["parse","links"],
+            Link_Location: "*"
+        },
+        Category: {
+            APIAction: "action=query&format=json&list=categorymembers&cmprop=title&cmlimit=max", 
+            APISource: "cmtitle", 
+            List_Access: ["query","categorymembers"],
+            Link_Location: "title"
+        }
+    }
+    function GeneratePageList()
+    {
+        var siteLink = "https://"+siteSettings.link+".fandom.com"
+        var option = document.getElementById('optionSelector').value
+
+        var source_page = siteSettings.options[option].source_page
+        var source_type = siteSettings.options[option].source_type
+        var linkSettings = ListSettings[source_type]
+        var link = siteLink+"/api.php?"+linkSettings.APIAction+"&"+linkSettings.APISource+"="+source_page
+        fetch(link, {method: 'GET', headers: new Headers({"Api-User-Agent": "FandomJsonDataGatherer/1.0 (joelh2003@gmail.com) JavaScript"}), mode:"no-cors"}).then(
+            info => info.json().then(
+                data => {
+                    var validlinks = []
+                    var links = data[linkSettings.List_Access[0]][linkSettings.List_Access[1]]
+                    for (var link in links) {
+                        if (links[link].ns == 0) validlinks.push(links[link][linkSettings.Link_Location])
+                    }
+                    var str = JSON.stringify(validlinks)
+                    document.getElementById('pageList').innerText = str
+                }
+            )
+        )
+    }
+</script>
+</head>
+
+<body>
+<aside class="viewWindow" id="object">
+Setting Object
+</aside>
+  <main>
+    <h1>Site Settings</h1>
+    <span id="linkSpan">What is the sites link?<input type="text" id="link" title="Site Link" onchange="SetLink()"></span><br>
+    <span id="titleSpan" style="display: none;">What is the name of the game this is for?<input type="text" id="title" title="Site Title" onchange="SetTitle()"></span><br><br>
+    <span id="options" style="display: none;">
+        <form>
+            Option Name: <input type="text" id="optionName" required><br>
+            Page to get Option Data From: <input type="text" id="optionSource" required><br>
+            Type of Page: <select id="optionType">
+                <option value="Page_Links">Links on Page</option>
+                <option value="Category">Category Listing</option>
+            </select>
+            <input type="button" value="Add Option" onclick="AddOption()">
+        </form>
+    </span><br>
+    <span id="editOptions" style="display: none;">
+        <form>
+            Option: <select id="optionSelector">
+            </select><input type="button" value="View Pages List" onclick="GeneratePageList()"><br>
+            Data Name: <input type="text" id="displayName"><br>
+            Location: <input type="text" id="dataLocation"><br>
+            Location Of Data: <select id="dataLocationType">
+                <option value="properties">Property</option>
+                <option value="page_templates">Template</option>
+            </select><br>
+            Type of Data: <select id="dataType">
+                <option value="number">Number</option>
+                <option value="text">Text</option>
+                <option value="wrapped">Wrapped</option>
+            </select><br>
+            Required?: <input type="checkbox" id="dataRequired" checked><br>
+            Default Data Value: <input type="text" id="dataDefault"><br>
+            <input type="button" value="Delete Option" onclick="RemoveOption()">
+            <input type="button" value="Delete Data Entry" onclick="RemoveDataOption()">
+            <input type="button" value="Set Data Entry" onclick="AddDataOption()">
+  </main>
+</body>
+
+</html>

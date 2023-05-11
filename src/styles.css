@@ -40,3 +40,10 @@ th, td {
   border: 1px black solid;
   padding: 5px;
 }
+
+.viewWindow {
+  background-color: gray;
+  float: right;
+  width: 20%;
+  min-height: 200px;
+}
