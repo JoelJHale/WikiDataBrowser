@@ -12,7 +12,57 @@
     const linkParam = urlParams.get('site');
   </script>
   <script src="SettingObject.js"></script>
+</head>
+
+<body>
+<aside class="viewWindow" id="object" style="word-wrap: break-word;">
+Setting Object
+</aside>
+  <main>
+    <h1>Site Settings</h1>
+    <div id="main" style="border: 2px black solid; text-align: center;">
+        <h1>Create Settings for your Fandom Site!</h1>
+        <input type="text" id="link" title="Site Link" onchange="SetLink()">
+        <div id = "settings">
+            <h2>What would you like the visible name to be?</h2>
+            <input type="text" id="title" title="Site Title" onchange="SetTitle()">
+            <br><br>
+            <div class="option" style="border: 1px black solid;" id="baseSetting">
+                Name of item: <input type="text" id="optionName" onchange="SetOptionName(this)"><br>
+                Page to get Option Data From: <input type="text" id="source_page" onchange="SetOptionSourcePage(this)"><br>
+                Type of Page: <select id="source_type" onchange="SetOptionSourceType(this)">
+                    <option value="Page_Links">Links on Page</option>
+                    <option value="Category">Category Listing</option>
+                </select><br>
+                <div class="dataPoint" style="background-color: lightcoral; border-radius: 30px; display: inline-block;" id ="baseDataPoint">
+                    Data Name: <input type="text" id="displayName"><br>
+                    Location Of Data: <select id="dataLocationType">
+                        <option value="properties">Property</option>
+                        <option value="page_templates">Template</option>
+                    </select><br>
+                    Location: <input type="text" id="dataLocation"><br>
+                    Type of Data: <select id="dataType">
+                        <option value="number">Number</option>
+                        <option value="text">Text</option>
+                        <option value="wrapped">Wrapped</option>
+                    </select><br>
+                    Required?: <input type="checkbox" id="dataRequired" checked>
+                    Default Data Value: <input type="text" id="dataDefault"><br>
+                    <button onclick="RemoveDataOption(this)">Delete Data Point</button>
+                </div>
+                <button onclick="AddDataOption(this)" style="display:block;">Add Data</button>
+                <h3>Sample View</h3>
+                <table>
+
+                </table>
+                <button onclick="RemoveOption(this)" id="lastDataPoint">Delete Option</button>
+            </div>
+            <button onclick="AddOption()" id="lastOption">Add new item option</button>
+        </div>
+    </div>
+  </main>
   <script>
+    
     var siteSettings
     function UpdateAsideBox()
     {
@@ -36,173 +86,100 @@
         try {
             siteSettings = await Settings.Create(link)
             document.getElementById('title').value = siteSettings.title
-            linkElem.disable = true
-            Reveal('titleSpan')
-            Reveal('options')
+            linkElem.disabled = true
+            Reveal('settings')
             UpdateAsideBox()
         }
         catch (err)
         {
-            alert("Link was invalid")
+            alert("Link was invalid " + link)
             console.error(err)
         }
     }
     function SetTitle()
     {
+        if (!siteSettings)
+        {
+            alert("Select a site first.")
+            return
+        }
         siteSettings.SetTitle(value)
         UpdateAsideBox()
     }
-    function UpdateOptionsSelector()
-    {
-        var elem = document.getElementById('optionSelector')
-        var found = false
-        while (elem.options.length) elem.remove(0)
-        for (var option in siteSettings.options)
-        {
-            found = true
-            var optionElement = new Option(option, option)
-            elem.add(optionElement)
-        }
-        if (!found) document.getElementById('editOptions').style.display = 'none'
-    }
+    var baseSetting = document.getElementById('baseSetting')
+    var dataPoint = document.getElementById('baseDataPoint')
+    var position = document.getElementById("lastOption")
+    baseSetting.style.display = "none"
     function AddOption()
     {
-        var option = document.getElementById('optionName').value
-        var optionSource = document.getElementById('optionSource').value
-        var type = document.getElementById('optionType').value
-        var newOption = new Options
-        newOption.source_page = optionSource
-        newOption.source_type = type
-        siteSettings.options[option] = newOption
-        document.getElementById('editOptions').style.display = 'initial'
-        UpdateOptionsSelector()
-        UpdateAsideBox()
+        var newSetting = baseSetting.cloneNode(true)
+        newSetting.id = ""
+        newSetting.style.display = "block"
+        position.before(newSetting)
     }
-    function RemoveOption()
+    AddOption()
+    function RemoveOption(button)
     {
-        var option = document.getElementById('optionSelector').value
-        delete siteSettings.options[option]
-        UpdateOptionsSelector()
-        UpdateAsideBox()
-
-    }
-    function RemoveDataOption()
-    {
-        var option = document.getElementById('optionSelector').value
-        var data = document.getElementById('displayName').value
-        var locationType = document.getElementById('dataLocationType').value
-        var locationArray = siteSettings.options[option].array_data[locationType]
-        if (locationArray == null) return
-        for (let i = locationArray.length-1; i>=0; i--)
+        var id = button.parentNode.id
+        if (id != "")
         {
-            if (locationArray[i].displayName == data) locationArray.splice(i, 1)
+            siteSettings.DeleteOption(id)
         }
-        if (locationArray.length == 0) locationArray = null
+        button.parentNode.remove()
+        UpdateAsideBox()
+
+    }
+    function RemoveDataOption(button)
+    {
+        button.parentNode.remove()
         UpdateAsideBox()
     }
-    function AddDataOption()
+    function AddDataOption(buttonPos)
     {
-        var option = document.getElementById('optionSelector').value
-        var dataName = document.getElementById('displayName').value
-        var locationType = document.getElementById('dataLocationType').value
-        var location = document.getElementById('dataLocation').value
-        var required = document.getElementById('dataRequired').checked
-        var defaultValue = document.getElementById('dataDefault').value
-        var type = document.getElementById('dataType').value
-        
-        if (siteSettings.options[option].array_data[locationType] == null) siteSettings.options[option].array_data[locationType] = []
-
-        var dataOption = new Data()
-        dataOption.default = defaultValue
-        dataOption.displayName = dataName
-        dataOption.location = location
-        dataOption.required = required
-        dataOption.type = type
-
-        siteSettings.options[option].array_data[locationType].push(dataOption)
+        var newPoint = dataPoint.cloneNode(true)
+        buttonPos.before(newPoint)
         UpdateAsideBox()
     }
-    ListSettings = 
+
+    function SetOptionName(input)
     {
-        Page_Links: {
-            APIAction: "action=parse&format=json&prop=links", 
-            APISource: "page",
-            List_Access: ["parse","links"],
-            Link_Location: "*"
-        },
-        Category: {
-            APIAction: "action=query&format=json&list=categorymembers&cmprop=title&cmlimit=max", 
-            APISource: "cmtitle", 
-            List_Access: ["query","categorymembers"],
-            Link_Location: "title"
+        var oldid = input.parentNode.id
+        var newid = input.value
+        if (oldid == "") siteSettings.CreateOption(newid)
+        else siteSettings.MoveOption(oldid, newid)
+        input.parentNode.id = newid
+        UpdateAsideBox()
+    }
+
+    function SetOptionSourcePage(input)
+    {
+        var id = input.parentNode.id
+        if (!siteSettings.GetOption(id))
+        {
+            alert("Fill in name of item option first.")
         }
+        else siteSettings.SetOptionPage(id, input.value)
+        UpdateAsideBox()
+
     }
-    function GeneratePageList()
+
+    function SetOptionSourceType(input)
     {
-        var siteLink = "https://"+siteSettings.link+".fandom.com"
-        var option = document.getElementById('optionSelector').value
 
-        var source_page = siteSettings.options[option].source_page
-        var source_type = siteSettings.options[option].source_type
-        var linkSettings = ListSettings[source_type]
-        var link = siteLink+"/api.php?"+linkSettings.APIAction+"&"+linkSettings.APISource+"="+source_page
-        fetch(link, {method: 'GET', headers: new Headers({"Api-User-Agent": "FandomJsonDataGatherer/1.0 (joelh2003@gmail.com) JavaScript"}), mode:"no-cors"}).then(
-            info => info.json().then(
-                data => {
-                    var validlinks = []
-                    var links = data[linkSettings.List_Access[0]][linkSettings.List_Access[1]]
-                    for (var link in links) {
-                        if (links[link].ns == 0) validlinks.push(links[link][linkSettings.Link_Location])
-                    }
-                    var str = JSON.stringify(validlinks)
-                    document.getElementById('pageList').innerText = str
-                }
-            )
-        )
     }
-</script>
-</head>
 
-<body>
-<aside class="viewWindow" id="object">
-Setting Object
-</aside>
-  <main>
-    <h1>Site Settings</h1>
-    <span id="linkSpan">What is the sites link?<input type="text" id="link" title="Site Link" onchange="SetLink()"></span><br>
-    <span id="titleSpan" style="display: none;">What is the name of the game this is for?<input type="text" id="title" title="Site Title" onchange="SetTitle()"></span><br><br>
-    <span id="options" style="display: none;">
-        <form>
-            Option Name: <input type="text" id="optionName" required><br>
-            Page to get Option Data From: <input type="text" id="optionSource" required><br>
-            Type of Page: <select id="optionType">
-                <option value="Page_Links">Links on Page</option>
-                <option value="Category">Category Listing</option>
-            </select>
-            <input type="button" value="Add Option" onclick="AddOption()">
-        </form>
-    </span><br>
-    <span id="editOptions" style="display: none;">
-        <form>
-            Option: <select id="optionSelector">
-            </select><input type="button" value="View Pages List" onclick="GeneratePageList()"><br>
-            Data Name: <input type="text" id="displayName"><br>
-            Location: <input type="text" id="dataLocation"><br>
-            Location Of Data: <select id="dataLocationType">
-                <option value="properties">Property</option>
-                <option value="page_templates">Template</option>
-            </select><br>
-            Type of Data: <select id="dataType">
-                <option value="number">Number</option>
-                <option value="text">Text</option>
-                <option value="wrapped">Wrapped</option>
-            </select><br>
-            Required?: <input type="checkbox" id="dataRequired" checked><br>
-            Default Data Value: <input type="text" id="dataDefault"><br>
-            <input type="button" value="Delete Option" onclick="RemoveOption()">
-            <input type="button" value="Delete Data Entry" onclick="RemoveDataOption()">
-            <input type="button" value="Set Data Entry" onclick="AddDataOption()">
-  </main>
+    function SetDataPointName(input)
+    {
+        var oldid = input.parentNode.id
+        var newid = input.value
+        UpdateAsideBox()
+    }
+
+    function SetDataPointParam()
+    {
+        UpdateAsideBox()
+    }
+  </script>
 </body>
 
 </html>
