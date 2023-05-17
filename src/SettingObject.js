@@ -51,6 +51,14 @@ class Settings{
         if (page.includes("Category:")) option.source_type = "Category"
         else option.source_type = "Page_Links"
     }
+    RemoveOptionPoint(optionID, point)
+    {
+        var option = this.GetOption(optionID)
+        
+        
+        if (page.includes("Category:")) option.source_type = "Category"
+        else option.source_type = "Page_Links"
+    }
 }
 class Options{
     source_page

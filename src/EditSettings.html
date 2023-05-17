@@ -160,12 +160,17 @@ Setting Object
         }
         else siteSettings.SetOptionPage(id, input.value)
         UpdateAsideBox()
-
     }
 
     function SetOptionSourceType(input)
     {
-
+        var id = input.parentNode.id
+        if (!siteSettings.GetOption(id))
+        {
+            alert("Fill in name of item option first.")
+        }
+        else siteSettings.SetOptionPage(id, input.value)
+        UpdateAsideBox()
     }
 
     function SetDataPointName(input)

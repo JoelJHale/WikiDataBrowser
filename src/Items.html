@@ -6,17 +6,86 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <title>Item Info</title>
+</head>
+
+<body>
+  <header><a href="/src/"></a></header>
+  <aside id="ToggleBox" class="viewWindow">
+    <select onchange="SortChange()" id="sort">
+      <option value="none">None</option>
+    </select>
+    Ascending?<input onchange="SortChange()" type="checkbox" id="sortDirection">
+    <br><br>
+  </aside>
+  <main>
+    <h1 id = "siteHead"></h1>
+    <table id="itemTable"></table>
+  </main>
   <script>
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const linkParam = urlParams.get('site');
     const itemParam = urlParams.get('item');
+    var table = document.getElementById('itemTable')
     var tableData = []
+    var items = []
+
+    function moveItems()
+    {
+      for (let i = 0; i < items.length; i++)
+      {
+        table.append(items[i].rowPointer)
+      }
+    }
+
+    function sortItems(value, ascending)
+    {
+      items.sort(function (a,b){
+        return (a[value] - b[value])*ascending
+      })
+    }
+    function SortChange()
+    {
+      var sortVal = document.getElementById("sort").value
+      var dir = -1
+      if (document.getElementById("sortDirection").checked) dir = 1
+      if (sortVal != "none")
+      {
+        sortItems(sortVal, dir)
+        moveItems()
+      }
+    }
+
+		function toggleColumn(columnIndex) {
+			var column = table.getElementsByClassName(columnIndex);
+			for (var i = 0; i < column.length; i++) {
+				if (column[i].style.display === "none") {
+					column[i].style.display = "table-cell";
+				} else {
+					column[i].style.display = "none";
+				}
+			}
+		}
+
+    function ToggleButton(colName)
+    {
+      var aside = document.getElementById("ToggleBox")
+
+      var toggle = document.createElement("input")
+      toggle.type = 'checkbox'
+      toggle.checked = true
+
+      toggle.addEventListener('change', function() {toggleColumn(colName)})
+
+      aside.append(toggle)
+      aside.append(colName)
+      aside.append(document.createElement("br"))
+    }
+
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
               var option = jsonData.options[itemParam]
-              var table = document.getElementById('itemTable')
               var row = document.createElement('tr')
               var itemNameTH = document.createElement('th')
               itemNameTH.className = 'itemColumn'
@@ -27,11 +96,19 @@
                 var dataArray = option.array_data[data_type]
                 for (var key in dataArray)
                 {
-                  tableData.push(dataArray[key].displayName)
+                  var name = dataArray[key].displayName
+                  tableData.push(name)
                   var dataTH = document.createElement('th')
-                  dataTH.className = dataArray[key].displayName
-                  dataTH.innerHTML = dataArray[key].displayName
+                  dataTH.className = name
+                  dataTH.innerHTML = name
                   row.appendChild(dataTH)
+
+                  ToggleButton(name)
+
+                  var sortOption = document.createElement("option")
+                  sortOption.innerHTML = name
+                  sortOption.value = name
+                  document.getElementById('sort').append(sortOption)
                 }
                 table.prepend(row)
               }
@@ -42,7 +119,6 @@
       fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
         result => result.json().then(
             jsonData => {
-              var table = document.getElementById('itemTable')
               for (var itemName in jsonData)
               {
                 var row = document.createElement('tr')
@@ -57,6 +133,7 @@
                   dataTD.innerHTML = jsonData[itemName][tableData[key]]
                   row.appendChild(dataTD)
                 }
+                items.push({...jsonData[itemName], rowPointer: row})
                 table.append(row)
               }
             }
@@ -64,13 +141,6 @@
         )
     
   </script>
-</head>
-
-<body>
-  <main>
-    <h1 id = "siteHead"></h1>
-    <table id="itemTable"></table>
-  </main>
 </body>
 
 </html>
