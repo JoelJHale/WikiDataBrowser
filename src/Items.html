@@ -41,17 +41,16 @@
     function sortItems(value, ascending)
     {
       items.sort(function (a,b){
-        return (a[value] - b[value])*ascending
+        return ((a[value] < b[value]) == ascending) ? -1:1
+        
       })
     }
     function SortChange()
     {
       var sortVal = document.getElementById("sort").value
-      var dir = -1
-      if (document.getElementById("sortDirection").checked) dir = 1
       if (sortVal != "none")
       {
-        sortItems(sortVal, dir)
+        sortItems(sortVal, document.getElementById("sortDirection").checked)
         moveItems()
       }
     }
@@ -81,6 +80,27 @@
       aside.append(colName)
       aside.append(document.createElement("br"))
     }
+    var searchTerms = {}
+    function SearchBy(row, value)
+    {
+      value = value.toLowerCase()
+      for (var i = 0; i < items.length; i++)
+      {
+        if (items[i][row].toString().toLowerCase().includes(value)) items[i].rowPointer.style.display = ""
+        else items[i].rowPointer.style.display = "none"
+      }
+    }
+
+    function AddSearch(value)
+    {
+      var search = document.createElement('input')
+      search.type = 'text'
+      search.placeholder = "search/filter"
+      search.addEventListener('change', ()=>{SearchBy(value, search.value)})
+      search.size = 6
+      return search
+      
+    }
 
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
         result => result.json().then(
@@ -90,6 +110,9 @@
               var itemNameTH = document.createElement('th')
               itemNameTH.className = 'itemColumn'
               itemNameTH.innerHTML = 'Page'
+              var search = AddSearch('name')
+              itemNameTH.prepend(document.createElement('br'))
+              itemNameTH.prepend(search)
               row.appendChild(itemNameTH)
               for (var data_type in option.array_data)
               {
@@ -100,13 +123,17 @@
                   tableData.push(name)
                   var dataTH = document.createElement('th')
                   dataTH.className = name
-                  dataTH.innerHTML = name
+                  dataTH.innerText = name
+
+                  var search = AddSearch(name)
+                  dataTH.prepend(document.createElement('br'))
+                  dataTH.prepend(search)
                   row.appendChild(dataTH)
 
                   ToggleButton(name)
 
                   var sortOption = document.createElement("option")
-                  sortOption.innerHTML = name
+                  sortOption.innerText = name
                   sortOption.value = name
                   document.getElementById('sort').append(sortOption)
                 }
