@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <header><a href="/"></a></header>
+  <script src="Header.js"></script>
 <aside class="viewWindow" id="object" style="word-wrap: break-word;">
 Setting Object
 </aside>
@@ -36,19 +36,19 @@ Setting Object
                     <option value="Category">Category Listing</option>
                 </select><br>
                 <div class="dataPoint" style="background-color: lightcoral; border-radius: 30px; display: inline-block;" id ="baseDataPoint">
-                    Data Name: <input type="text" id="displayName"><br>
-                    Location Of Data: <select id="dataLocationType">
+                    Data Name: <input type="text" id="displayName" onchange="SetDataPoint(this.parentNode)"><br>
+                    Location Of Data: <select id="dataLocationType" onchange="SetDataPoint(this.parentNode)">
                         <option value="properties">Property</option>
                         <option value="page_templates">Template</option>
                     </select><br>
-                    Location: <input type="text" id="dataLocation"><br>
-                    Type of Data: <select id="dataType">
+                    Location: <input type="text" id="dataLocation" onchange="SetDataPoint(this.parentNode)"><br>
+                    Type of Data: <select id="dataType" onchange="SetDataPoint(this.parentNode)">
                         <option value="number">Number</option>
                         <option value="text">Text</option>
                         <option value="wrapped">Wrapped</option>
                     </select><br>
-                    Required?: <input type="checkbox" id="dataRequired" checked>
-                    Default Data Value: <input type="text" id="dataDefault"><br>
+                    Required?: <input type="checkbox" id="dataRequired" checked onchange="SetDataPoint(this.parentNode)">
+                    Default Data Value: <input type="text" id="dataDefault" onchange="SetDataPoint(this.parentNode)"><br>
                     <button onclick="RemoveDataOption(this)">Delete Data Point</button>
                 </div>
                 <button onclick="AddDataOption(this)" style="display:block;">Add Data</button>
@@ -63,7 +63,15 @@ Setting Object
     </div>
   </main>
   <script>
-    
+    function GetChildByID(element, ID)
+    {
+        var children = element.children
+        for (var i in children)
+        {
+            if (children[i].id == ID) return children[i]
+        }
+        return null
+    }
     var siteSettings
     function UpdateAsideBox()
     {
@@ -104,7 +112,7 @@ Setting Object
             alert("Select a site first.")
             return
         }
-        siteSettings.SetTitle(value)
+        siteSettings.SetTitle(document.getElementById('title').value)
         UpdateAsideBox()
     }
     var baseSetting = document.getElementById('baseSetting')
@@ -132,6 +140,10 @@ Setting Object
     }
     function RemoveDataOption(button)
     {
+        if (button.parentNode.id)
+        {
+            siteSettings.RemoveOptionPoint(button.parentNode.parentNode.id,button.parentNode.id)
+        }
         button.parentNode.remove()
         UpdateAsideBox()
     }
@@ -160,6 +172,7 @@ Setting Object
             alert("Fill in name of item option first.")
         }
         else siteSettings.SetOptionPage(id, input.value)
+        GetChildByID(input.parentNode, 'source_type').value = siteSettings.GetOption(id).source_type
         UpdateAsideBox()
     }
 
@@ -170,14 +183,31 @@ Setting Object
         {
             alert("Fill in name of item option first.")
         }
-        else siteSettings.SetOptionPage(id, input.value)
+        else siteSettings.SetOptionType(id, input.value)
+        GetChildByID(input.parentNode, 'source_page').value = siteSettings.GetOption(id).source_page
         UpdateAsideBox()
     }
 
-    function SetDataPointName(input)
+    function SetDataPoint(inputBox)
     {
-        var oldid = input.parentNode.id
-        var newid = input.value
+        var OptionID = inputBox.parentNode.id
+        var oldid = inputBox.id
+        var newid = GetChildByID(inputBox,'displayName').value
+        var locationType = GetChildByID(inputBox,'dataLocationType').value
+        var location = GetChildByID(inputBox,'dataLocation').value
+        var required = GetChildByID(inputBox,'dataRequired').checked
+        var defaultVal = GetChildByID(inputBox,'dataDefault').value
+        var dataType = GetChildByID(inputBox,'dataType').value
+
+        siteSettings.EditDataPoint(OptionID, oldid, {
+            displayName:newid,
+            location:location,
+            locationType:locationType,
+            default:defaultVal,
+            type:dataType,
+            required:required
+        })
+        inputBox.id = newid
         UpdateAsideBox()
     }
 

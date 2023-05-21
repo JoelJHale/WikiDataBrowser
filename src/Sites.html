@@ -16,6 +16,7 @@
               for (var id in jsonData)
               {
                 var newA = document.createElement('a')
+                newA.className = 'linkOption'
                 newA.textContent = jsonData[id].title
                 newA.href =  "SiteOptions.html?site=" + jsonData[id].link
                 span.appendChild(newA)
@@ -27,7 +28,7 @@
 </head>
 
 <body>
-  <header><a href="/"></a></header>
+  <script src="Header.js"></script>
   <main>
     <h1>Available sites: </h1>
     <span id="linkslist"></span>
