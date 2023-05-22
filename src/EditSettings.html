@@ -62,7 +62,10 @@ Setting Object
         </div>
     </div>
   </main>
+  <script src="Loading.js"></script>
   <script>
+    StartLoading("Loading...")
+    Loaded()
     function GetChildByID(element, ID)
     {
         var children = element.children
@@ -93,7 +96,9 @@ Setting Object
         if (httpsLoc != -1) link = link.slice(httpsLoc+8)
         linkElem.value = link
         try {
+            Restart("Checking Site Validity...")
             siteSettings = await Settings.Create(link)
+            Loaded()
             document.getElementById('title').value = siteSettings.title
             linkElem.disabled = true
             Reveal('settings')

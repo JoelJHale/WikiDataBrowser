@@ -6,13 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <title>Site Options</title>
+</head>
+
+<body>
+  <script src="Header.js"></script>
+  <main>
+    <h1 id="siteHead">Options for  </h1>
+    <span id="linkslist"></span>
+  </main>
+  <script src="Loading.js"></script>
   <script>
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const linkParam = urlParams.get('site');
+    document.getElementById("siteHead").append(linkParam)
+    StartLoading("Fetching Site Information...")
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
+              SetStatus("Setting Up Site")
               var span = document.getElementById('linkslist')
               for (var i in jsonData)
               {
@@ -23,17 +35,10 @@
                 span.appendChild(newA)
                 span.appendChild(document.createElement('br'))
               }
+              Loaded()
             }
         ))
   </script>
-</head>
-
-<body>
-  <script src="Header.js"></script>
-  <main>
-    <h1 id="siteHead">Options for site: </h1>
-    <span id="linkslist"></span>
-  </main>
 </body>
 
 </html>

@@ -21,6 +21,7 @@
     <h1 id = "siteHead"></h1>
     <table id="itemTable"></table>
   </main>
+  <script src="Loading.js"></script>
   <script>
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -101,10 +102,14 @@
       return search
       
     }
-
+    StartLoading("Fetching Layout Information...")
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
+              SetStatus("Setting Up Layout")
+
+              document.getElementById("siteHead").append(jsonData.title + " " + itemParam)
+              
               var option = jsonData.options[itemParam]
               var row = document.createElement('tr')
               var itemNameTH = document.createElement('th')
@@ -139,6 +144,7 @@
                 }
                 table.prepend(row)
               }
+              SetStatus("Fetching Item Data")
               return
             }
         ))
@@ -148,6 +154,7 @@
             jsonData => {
               for (var itemName in jsonData)
               {
+                SetStatus("Formatting Item Data")
                 var row = document.createElement('tr')
                 var itemNameTH = document.createElement('th')
                 itemNameTH.className = 'itemColumn'
@@ -162,6 +169,7 @@
                 }
                 items.push({...jsonData[itemName], rowPointer: row})
                 table.append(row)
+                Loaded()
               }
             }
         ))

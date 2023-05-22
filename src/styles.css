@@ -64,3 +64,25 @@ header{
   border-radius: 30px;
   margin: 5px;
 }
+
+.load
+{
+  top: 0;
+  margin: 0 auto;
+  padding-top: 10%;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  position: fixed;
+  z-index: 100;
+  background-color: rgba(128, 128, 128, 0.8);
+  font-size: x-large;
+}
+.load img {
+  position: relative;
+  align-self: center;
+  vertical-align: center;
+  height: 40%;
+  min-width: 20%;
+  max-width: 50%;
+}
