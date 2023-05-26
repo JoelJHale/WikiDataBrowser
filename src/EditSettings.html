@@ -34,7 +34,8 @@ Setting Object
                 Type of Page: <select id="source_type" onchange="SetOptionSourceType(this)">
                     <option value="Page_Links">Links on Page</option>
                     <option value="Category">Category Listing</option>
-                </select><br>
+                </select>
+                <button onclick="LoadOptionStats(this)">Load Info</button><br>
                 <div class="dataPoint" style="background-color: lightcoral; border-radius: 30px; display: inline-block;" id ="baseDataPoint">
                     Data Name: <input type="text" id="displayName" onchange="SetDataPoint(this.parentNode)"><br>
                     Location Of Data: <select id="dataLocationType" onchange="SetDataPoint(this.parentNode)">
@@ -52,14 +53,19 @@ Setting Object
                     <button onclick="RemoveDataOption(this)">Delete Data Point</button>
                 </div>
                 <button onclick="AddDataOption(this)" style="display:block;">Add Data</button>
+                Pages To Search: <button onclick="ToggleList(this)">Toggle</button><span id="pageList" style="display:none;"></span>
                 <h3>Sample View</h3>
-                <table>
+                <table id="tableView">
 
                 </table>
                 <button onclick="RemoveOption(this)" id="lastDataPoint">Delete Option</button>
             </div>
             <button onclick="AddOption()" id="lastOption">Add new item option</button>
         </div>
+        Global Pass Code: <input type="password" id="creationCode">
+        Site Pass Code: <input type="password" id="dataLocation">
+        <button onclick="" id="lastOption">Add your site!</button>
+        
     </div>
   </main>
   <script src="Loading.js"></script>
@@ -193,6 +199,112 @@ Setting Object
         UpdateAsideBox()
     }
 
+    var tableData = {}
+
+    
+    class Types
+    {
+        static number = "([0-9|\.|\,]+)" 
+        static text = "(.*)" 
+        static wrapped = ">(.*)<" 
+    }
+
+    function LoadOptionStats(button)
+    {
+        var id = button.parentNode.id
+        Restart("Getting Option Display Data")
+        siteSettings.LoadOptionData(id).then(
+            (data) =>
+            {
+                GetChildByID(button.parentNode, "pageList").innerText = JSON.stringify(data.pageList)
+                tableData[id] = data.pageInfo
+            }
+        )
+        .catch((err) => alert(err))
+        .finally(Loaded())
+    }
+
+    function ToggleList(button)
+    {
+        var elem = GetChildByID(button.parentNode, "pageList")
+        elem.style.display = (elem.style.display == "none") ? "":"none"
+    }
+
+    function GetData(type, page, dataPoint)
+    {
+        if (type == 'properties')
+        {
+            var propertyData = JSON.parse(page.parse.properties[0]["*"])[0].data
+            var data = propertyData.find((value) => {return value.data.source == dataPoint.location})
+            if (data == null) {
+                if (dataPoint.required) return null
+                else return dataPoint.default
+            }
+            
+            data = data.data.value.match(Types[dataPoint.type])[1]
+            if (dataPoint.type == 'number') data = Number.parseFloat(data.replace("\,\g",""))
+            return data
+        }
+        else if (type == 'page_templates')
+        {
+            var pageData = page.parse.wikitext['*']
+            var data = pageData.match("\\|"+dataPoint.location+"\\s?=\\s?([^\x7C\\n}]+)(?:\x7C|\\n|}})")[1]
+            if (data == '') {
+                if (dataPoint.required) return null
+                else return dataPoint.default
+            }
+
+            if (dataPoint.type == "number") data = Number.parseFloat(data.replace("\,\g",""))
+            foundData[dataPoint.displayName] = data
+
+        }
+    }
+
+    function UpdateTable(tableParent)
+    {
+        var table = GetChildByID(tableParent, 'tableView')
+        const id = tableParent.id
+        console.log(id)
+        table.innerHTML = ''
+        
+        var option = siteSettings.GetOption(id)
+        var row = document.createElement('tr')
+        var itemNameTH = document.createElement('th')
+        itemNameTH.innerHTML = 'Page'
+        row.appendChild(itemNameTH)
+        var tableRows = []
+        for (var i in tableData[id])
+        {
+            var irow = document.createElement('tr')
+            var itemNameTH = document.createElement('th')
+            itemNameTH.className = 'itemColumn'
+            itemNameTH.innerHTML = tableData[id][i].parse.title
+            irow.appendChild(itemNameTH)
+            tableRows.push(irow)
+            table.append(irow)
+        }
+        for (var data_type in option.array_data)
+        {
+            var dataArray = option.array_data[data_type]
+            for (var key in dataArray)
+            {
+                var name = dataArray[key].displayName
+                var dataTH = document.createElement('th')
+                dataTH.innerText = name
+                row.appendChild(dataTH)
+                for (var i in tableData[id])
+                {
+                    var dataTD = document.createElement('td')
+                    var val = GetData(data_type, tableData[id][i], dataArray[key])
+                    dataTD.innerHTML = val
+                    tableRows[i].appendChild(dataTD)
+                    if (val == null) tableRows[i].style.display = 'none'
+                }
+            }
+            table.prepend(row)
+        }
+    }
+
     function SetDataPoint(inputBox)
     {
         var OptionID = inputBox.parentNode.id
@@ -213,6 +325,7 @@ Setting Object
             required:required
         })
         inputBox.id = newid
+        UpdateTable(inputBox.parentNode)
         UpdateAsideBox()
     }
 

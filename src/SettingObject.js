@@ -44,19 +44,30 @@ class Settings{
     {
         return this.options[id]
     }
-    async SetOptionPage(optionID, page)
+    SetOptionPage(optionID, page)
     {
         var option = this.GetOption(optionID)
         option.source_page = page
         if (page.includes("Category:")) option.source_type = "Category"
         else option.source_type = "Page_Links"
     }
-    async SetOptionType(optionID, type)
+    SetOptionType(optionID, type)
     {
         var option = this.GetOption(optionID)
         option.source_type = type
         if (type == "Category" && !option.source_page.includes("Category:")) option.source_page = "Category:" + option.source_page
 
+    }
+    async LoadOptionData(optionID)
+    {
+        var option = this.GetOption(optionID)
+        var site = await fetch('https://siteinfoaccess.azurewebsites.net/api/GetPageDisplayInfo?site='+this.link+'&page='+option.source_page+'&type='+option.source_type)
+        if (!site.ok)
+        {
+            throw new Error(site.body)
+        } 
+        var data = await site.json()
+        return data
     }
     RemoveOptionPoint(optionID, point)
     {
@@ -65,8 +76,6 @@ class Settings{
     }
     EditDataPoint(optionID, oldPoint, newData)
     {
-        console.log(newData)
-        console.log(oldPoint)
         var option = this.GetOption(optionID)
         this.RemoveOptionPoint(optionID, oldPoint)
         var obj = new Data(newData);
@@ -100,7 +109,6 @@ class Options{
             for (var j in oldArray)
             {
                 var elem = oldArray[j]
-                console.log(elem)
                 if (elem.displayName != id) newArray.push(elem)
             }
             this.array_data[i] = newArray
