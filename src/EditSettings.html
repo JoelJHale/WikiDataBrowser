@@ -21,14 +21,14 @@ Setting Object
 </aside>
   <main>
     <h1>Site Settings</h1>
-    <div id="main" style="border: 2px black solid; text-align: center;">
+    <div id="main">
         <h1>Create Settings for your Fandom Site!</h1>
         <input type="text" id="link" title="Site Link" onchange="SetLink()">
         <div id = "settings">
             <h2>What would you like the visible name to be?</h2>
             <input type="text" id="title" title="Site Title" onchange="SetTitle()">
             <br><br>
-            <div class="option" style="border: 1px black solid;" id="baseSetting">
+            <div class="option" id="baseSetting">
                 Name of item: <input type="text" id="optionName" onchange="SetOptionName(this)"><br>
                 Page to get Option Data From: <input type="text" id="source_page" onchange="SetOptionSourcePage(this)"><br>
                 Type of Page: <select id="source_type" onchange="SetOptionSourceType(this)">
@@ -36,13 +36,13 @@ Setting Object
                     <option value="Category">Category Listing</option>
                 </select>
                 <button onclick="LoadOptionStats(this)">Load Info</button><br>
-                <div class="dataPoint" style="background-color: lightcoral; border-radius: 30px; display: inline-block;" id ="baseDataPoint">
+                <div class="dataPoint" id ="baseDataPoint">
                     Data Name: <input type="text" id="displayName" onchange="SetDataPoint(this.parentNode)"><br>
                     Location Of Data: <select id="dataLocationType" onchange="SetDataPoint(this.parentNode)">
                         <option value="properties">Property</option>
                         <option value="page_templates">Template</option>
                     </select><br>
-                    Location: <input type="text" id="dataLocation" onchange="SetDataPoint(this.parentNode)"><br>
+                    Location: <input type="text" id="dataLocation" onchange="SetDataPoint(this.parentNode)" list="0"><br>
                     Type of Data: <select id="dataType" onchange="SetDataPoint(this.parentNode)">
                         <option value="number">Number</option>
                         <option value="text">Text</option>
@@ -52,8 +52,10 @@ Setting Object
                     Default Data Value: <input type="text" id="dataDefault" onchange="SetDataPoint(this.parentNode)"><br>
                     <button onclick="RemoveDataOption(this)">Delete Data Point</button>
                 </div>
+                <datalist id="0" class="dataList"></datalist>
                 <button onclick="AddDataOption(this)" style="display:block;">Add Data</button>
-                Pages To Search: <button onclick="ToggleList(this)">Toggle</button><span id="pageList" style="display:none;"></span>
+                Pages To Search: <button onclick="ToggleList(this)">Expand</button>
+                <div id="pageList" class="pageList"></div>
                 <h3>Sample View</h3>
                 <table id="tableView">
 
@@ -63,7 +65,7 @@ Setting Object
             <button onclick="AddOption()" id="lastOption">Add new item option</button>
         </div>
         Global Pass Code: <input type="password" id="creationCode">
-        Site Pass Code: <input type="password" id="dataLocation">
+        Site Pass Code: <input type="password" id="siteCode">
         <button onclick="" id="lastOption">Add your site!</button>
         
     </div>
@@ -130,10 +132,21 @@ Setting Object
     var dataPoint = document.getElementById('baseDataPoint')
     var position = document.getElementById("lastOption")
     baseSetting.style.display = "none"
+    var tableID = 1
     function AddOption()
     {
         var newSetting = baseSetting.cloneNode(true)
         newSetting.id = ""
+        
+        var divList = newSetting.getElementsByClassName('dataPoint')
+        GetChildByID(newSetting, '0').id = tableID+'propList'
+        console.log(divList)
+        for (var i = 0; i < divList.length; i++)
+        {
+            var elem = GetChildByID(divList[i], 'dataLocation')
+            elem.setAttribute('list', tableID + 'propList')
+        }
+        tableID++
         newSetting.style.display = "block"
         position.before(newSetting)
     }
@@ -161,6 +174,8 @@ Setting Object
     function AddDataOption(buttonPos)
     {
         var newPoint = dataPoint.cloneNode(true)
+        var dataList = buttonPos.parentNode.getElementsByClassName('dataList')[0]
+        GetChildByID(newPoint, 'dataLocation').setAttribute('list', dataList.id)
         buttonPos.before(newPoint)
         UpdateAsideBox()
     }
@@ -200,13 +215,32 @@ Setting Object
     }
 
     var tableData = {}
-
     
     class Types
     {
         static number = "([0-9|\.|\,]+)" 
         static text = "(.*)" 
         static wrapped = ">(.*)<" 
+    }
+
+    function AddPropOptions(listElement, pageInfo)
+    {
+        var propList = []
+        for (var i in pageInfo)
+        {
+            var propertyData = JSON.parse(pageInfo[i].parse.properties[0]["*"])[0].data
+            for (var j in propertyData)
+            {
+                if (!propList.includes(propertyData[j].data.source))
+                {
+                    var optionNode = document.createElement('option')
+                    optionNode.innerText = propertyData[j].data.source
+                    listElement.appendChild(optionNode)
+                    propList.push(propertyData[j].data.source)
+                }
+            }
+            
+        }
     }
 
     function LoadOptionStats(button)
@@ -217,6 +251,8 @@ Setting Object
             (data) =>
             {
                 GetChildByID(button.parentNode, "pageList").innerText = JSON.stringify(data.pageList)
+                var dataList = button.parentNode.getElementsByClassName('dataList')[0]
+                AddPropOptions(dataList, data.pageInfo)
                 tableData[id] = data.pageInfo
             }
         )
@@ -227,7 +263,7 @@ Setting Object
     function ToggleList(button)
     {
         var elem = GetChildByID(button.parentNode, "pageList")
-        elem.style.display = (elem.style.display == "none") ? "":"none"
+        elem.style.height = (elem.style.height == "") ? "auto":""
     }
 
     function GetData(type, page, dataPoint)

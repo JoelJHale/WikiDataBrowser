@@ -86,3 +86,27 @@ header{
   min-width: 20%;
   max-width: 50%;
 }
+
+.dataPoint
+{
+  background-color: lightcoral;
+  border-radius: 30px;
+  display: inline-block;
+}
+
+.option
+{
+  border: 1px black solid;
+}
+
+div#main {
+  border: 2px black solid;
+  text-align: center;
+}
+
+.pageList {
+  background-color: aqua;
+  height: 1.5rem;
+  word-wrap: break-word;
+  overflow: hidden;
+}
