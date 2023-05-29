@@ -12,7 +12,13 @@ class Settings{
         var siteInfo = await GetSiteBasics(link)
         if (!siteInfo.exists) throw new URIError("Supplied link doesn't seem to have a fandom site. " + link);
         //if (siteInfo.hasPage) throw new 
-
+        var dataList = document.getElementById('wikiPages')
+        for (var i in siteInfo.pageOptions)
+        {
+            var option = document.createElement("option")
+            option.innerText = siteInfo.pageOptions[i]
+            dataList.appendChild(option)
+        }
         var setting = new Settings(link, siteInfo.siteinfo.sitename)
         
         return setting

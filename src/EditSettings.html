@@ -30,7 +30,7 @@ Setting Object
             <br><br>
             <div class="option" id="baseSetting">
                 Name of item: <input type="text" id="optionName" onchange="SetOptionName(this)"><br>
-                Page to get Option Data From: <input type="text" id="source_page" onchange="SetOptionSourcePage(this)"><br>
+                Page to get Option Data From: <input type="text" id="source_page" onchange="SetOptionSourcePage(this)" list="wikiPages"><br>
                 Type of Page: <select id="source_type" onchange="SetOptionSourceType(this)">
                     <option value="Page_Links">Links on Page</option>
                     <option value="Category">Category Listing</option>
@@ -63,6 +63,9 @@ Setting Object
                 <button onclick="RemoveOption(this)" id="lastDataPoint">Delete Option</button>
             </div>
             <button onclick="AddOption()" id="lastOption">Add new item option</button>
+            <datalist id="wikiPages">
+
+            </datalist>
         </div>
         Global Pass Code: <input type="password" id="creationCode">
         Site Pass Code: <input type="password" id="siteCode">

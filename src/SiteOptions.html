@@ -19,25 +19,27 @@
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const linkParam = urlParams.get('site');
-    document.getElementById("siteHead").append(linkParam)
     StartLoading("Fetching Site Information...")
     fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam).then(
         result => result.json().then(
             jsonData => {
               SetStatus("Setting Up Site")
+              document.getElementById("siteHead").append(jsonData.name)
               var span = document.getElementById('linkslist')
-              for (var i in jsonData)
+              for (var i in jsonData.options)
               {
                 var newA = document.createElement('a')
                 newA.className = 'linkOption'
-                newA.textContent = jsonData[i]
-                newA.href =  "Items.html?site=" + linkParam + "&item=" + jsonData[i]
+                newA.textContent = jsonData.options[i]
+                newA.href =  "Items.html?site=" + linkParam + "&item=" + jsonData.options[i]
                 span.appendChild(newA)
                 span.appendChild(document.createElement('br'))
               }
-              Loaded()
+              return
             }
-        ))
+        )).catch((err) => {
+          
+        }).finally(Loaded())
   </script>
 </body>
 

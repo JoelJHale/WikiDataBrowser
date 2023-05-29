@@ -1,14 +1,20 @@
 * {
   font-family: Arial, Helvetica, sans-serif;
 }
-
-html, body {
+html
+{
+  min-height: 100%;
+}
+html body{
   margin: 0;
   border: 0;
   padding: 0;
-  background-color:aliceblue;
+  background-color: aliceblue;
+  min-height: 100%;
 }
-
+.classyPage {
+  background-image: linear-gradient(aliceblue, gray);
+}
 main {
   margin: auto;
   width: 50%;
@@ -29,6 +35,39 @@ main > h1 {
   text-decoration: none;
   color: black;
   display: inline-block;
+}
+
+.mainPageLink {
+  position: relative;
+  border: 2px rebeccapurple solid;
+  border-radius: 10px;
+  margin: auto;
+  text-align: center;
+  font-size: 5em;
+  background-color: lavender;
+  text-decoration: none;
+  color: black;
+  height: 200px;
+  overflow: hidden;
+  display: block;
+}
+
+.mainPageLink:hover {
+  min-height: 200px;
+  height: auto;
+}
+
+.mainPageLink img {
+  width: 100%;
+  filter: blur(5px);
+}
+
+.mainPageLink span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-shadow: 2px 2px 10px white;
 }
 
 table
