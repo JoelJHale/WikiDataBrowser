@@ -9,7 +9,7 @@ html body{
   margin: 0;
   border: 0;
   padding: 0;
-  background-color: aliceblue;
+  background-color:lightcyan;
   min-height: 100%;
 }
 .classyPage {
@@ -148,4 +148,8 @@ div#main {
   height: 1.5rem;
   word-wrap: break-word;
   overflow: hidden;
+}
+
+.itemTable {
+  background-image: linear-gradient(orchid, peachpuff);
 }
