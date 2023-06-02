@@ -131,6 +131,7 @@ header{
   background-color: lightcoral;
   border-radius: 30px;
   display: inline-block;
+  border: 1px black solid;
 }
 
 .option

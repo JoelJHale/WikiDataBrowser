@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
   <title>Editing Settings</title>
+  <script src="Loading.js"></script>
   <script>
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -24,7 +25,7 @@ Setting Object
     <div id="main">
         <h1>Create Settings for your Fandom Site!</h1>
         <input type="text" id="link" title="Site Link" onchange="SetLink()">
-        <div id = "settings">
+        <div id = "settings" style="display: none;">
             <h2>What would you like the visible name to be?</h2>
             <input type="text" id="title" title="Site Title" onchange="SetTitle()">
             <br><br>
@@ -67,16 +68,94 @@ Setting Object
 
             </datalist>
         </div>
-        Global Pass Code: <input type="password" id="creationCode">
-        Site Pass Code: <input type="password" id="siteCode">
-        <button onclick="" id="lastOption">Add your site!</button>
+        <div style="padding-top: 10px; border: 1px black solid;">
+            Global Pass Code: <input type="password" id="creationCode">
+            Site Pass Code: <input type="password" id="siteCode">
+            <button onclick="SaveData()" id="lastOption">Add your site!</button>
+        </div>
         
     </div>
   </main>
-  <script src="Loading.js"></script>
   <script>
     StartLoading("Loading...")
     Loaded()
+    var siteSettings
+
+    async function GenerateOptions(parentBox, options)
+    {
+        var box
+        for (var option in options)
+        {
+            var oData = options[option]
+            if (box) box = AddOption()
+            else {
+                box = parentBox.getElementsByClassName('option')[1]
+            }
+            siteSettings.CreateOption(option)
+            siteSettings.SetOptionPage(option, oData.source_page)
+            siteSettings.SetOptionType(option, oData.source_type)
+            box.id = option
+            GetChildByID(box, 'optionName').value = option
+            GetChildByID(box, 'source_page').value = oData.source_page
+            GetChildByID(box, 'source_type').value = oData.source_type
+            await LoadOptionStats(GetChildByID(box, 'optionName'))
+            
+            GenerateOptionData(box, oData.array_data, option)
+            
+        }
+    }
+
+    function GenerateOptionData(parentBox, datapoints, id)
+    {
+        var box
+        for (var dataType in datapoints)
+        {
+            for (var i in datapoints[dataType])
+            {
+                var data = datapoints[dataType][i]
+                data.locationType = dataType
+                if (box) box = AddDataOption(box)
+                else {
+                    box = parentBox.getElementsByClassName('dataPoint')[0]
+                }
+                siteSettings.EditDataPoint(id, "", data)
+                box.id = data.displayName
+                GetChildByID(box,'displayName').value = data.displayName
+                GetChildByID(box,'dataLocationType').value = dataType
+                GetChildByID(box,'dataLocation').value = data.location
+                GetChildByID(box,'dataRequired').checked = data.required
+                GetChildByID(box,'dataDefault').value = data.default
+                GetChildByID(box,'dataType').value = data.type
+            }
+        }
+        UpdateTable(parentBox)
+
+    }
+    if (linkParam)
+    {
+        Restart("Fetching data for site " + linkParam)
+        fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
+            (data) => {
+                data.json().then(
+                    (siteInfo) =>
+                    {
+                        var linkBox = document.getElementById('link')
+                        linkBox.value = siteInfo.link
+                        linkBox.disabled = true
+                        document.getElementById('title').value = siteInfo.title
+                        siteSettings = new Settings(siteInfo.link, siteInfo.title)
+
+                        Reveal('settings')
+
+                        GenerateOptions(document.getElementById('settings'), siteInfo.options).then(UpdateAsideBox)
+                        
+                    }
+                )
+            }
+        ).finally(
+            Loaded
+        )
+    }
     function GetChildByID(element, ID)
     {
         var children = element.children
@@ -86,7 +165,6 @@ Setting Object
         }
         return null
     }
-    var siteSettings
     function UpdateAsideBox()
     {
         var panel = document.getElementById('object')
@@ -143,7 +221,6 @@ Setting Object
         
         var divList = newSetting.getElementsByClassName('dataPoint')
         GetChildByID(newSetting, '0').id = tableID+'propList'
-        console.log(divList)
         for (var i = 0; i < divList.length; i++)
         {
             var elem = GetChildByID(divList[i], 'dataLocation')
@@ -152,6 +229,7 @@ Setting Object
         tableID++
         newSetting.style.display = "block"
         position.before(newSetting)
+        return newSetting
     }
     AddOption()
     function RemoveOption(button)
@@ -181,6 +259,7 @@ Setting Object
         GetChildByID(newPoint, 'dataLocation').setAttribute('list', dataList.id)
         buttonPos.before(newPoint)
         UpdateAsideBox()
+        return newPoint
     }
 
     function SetOptionName(input)
@@ -246,21 +325,22 @@ Setting Object
         }
     }
 
-    function LoadOptionStats(button)
+    async function LoadOptionStats(button)
     {
         var id = button.parentNode.id
         Restart("Getting Option Display Data")
-        siteSettings.LoadOptionData(id).then(
+        return siteSettings.LoadOptionData(id).then(
             (data) =>
             {
                 GetChildByID(button.parentNode, "pageList").innerText = JSON.stringify(data.pageList)
                 var dataList = button.parentNode.getElementsByClassName('dataList')[0]
                 AddPropOptions(dataList, data.pageInfo)
                 tableData[id] = data.pageInfo
+                return
             }
         )
         .catch((err) => alert(err))
-        .finally(Loaded())
+        .finally(Loaded)
     }
 
     function ToggleList(button)
@@ -303,7 +383,6 @@ Setting Object
     {
         var table = GetChildByID(tableParent, 'tableView')
         const id = tableParent.id
-        console.log(id)
         table.innerHTML = ''
         
         var option = siteSettings.GetOption(id)
@@ -371,6 +450,21 @@ Setting Object
     function SetDataPointParam()
     {
         UpdateAsideBox()
+    }
+
+    function SaveData()
+    {
+        var linkURI = 'https://createwikigatheringsettings.azurewebsites.net/api/CreateSettings'
+        var userToken = document.getElementById('creationCode').value
+        var siteToken = document.getElementById('siteCode').value
+        Restart("Saving Data")
+        fetch(linkURI+"?site="+siteSettings?.link+"&userToken="+userToken+"&siteToken="+siteToken, {method:'POST',body:JSON.stringify({"object":siteSettings})}).then(
+            (retObj) =>
+            {
+                if (!retObj.ok) retObj.text().then(alert);
+                else window.location.href = "Success.html";
+            }
+        ).finally(Loaded)
     }
   </script>
 </body>

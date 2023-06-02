@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Wiki Data Browser/Sites</title>
+</head>
+
+<body>
+  <script src="Header.js"></script>
+  <main>
+    <h1>Sites with Settings: </h1>
+    <span id="linkslist"></span>
+  </main>
+  <script src="Loading.js"></script>
+  <script>
+    StartLoading("Fetching Available Sites...")
+    fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData").then(
+        result => result.json().then(
+            jsonData => {
+              SetStatus("Setting Up Page")
+              var span = document.getElementById('linkslist')
+              for (var id in jsonData)
+              {
+                var newA = document.createElement('a')
+                newA.className = 'linkOption'
+                newA.textContent = jsonData[id].title
+                newA.href =  "EditSettings.html?site=" + jsonData[id].link
+                span.appendChild(newA)
+                span.appendChild(document.createElement('br'))
+              }
+              Loaded()
+            }
+        ))
+  </script>
+</body>
+
+</html>
