@@ -45,8 +45,8 @@ Setting Object
                     </select><br>
                     Location: <input type="text" id="dataLocation" onchange="SetDataPoint(this.parentNode)" list="0"><br>
                     Type of Data: <select id="dataType" onchange="SetDataPoint(this.parentNode)">
-                        <option value="number">Number</option>
                         <option value="text">Text</option>
+                        <option value="number">Number</option>
                         <option value="wrapped">Wrapped</option>
                     </select><br>
                     Required?: <input type="checkbox" id="dataRequired" checked onchange="SetDataPoint(this.parentNode)">
@@ -148,7 +148,7 @@ Setting Object
                         Reveal('settings')
 
                         GenerateOptions(document.getElementById('settings'), siteInfo.options).then(UpdateAsideBox)
-                        
+                        Settings.Create(siteInfo.link)
                     }
                 )
             }
@@ -310,6 +310,7 @@ Setting Object
         var propList = []
         for (var i in pageInfo)
         {
+            if (pageInfo[i].parse.properties[0] == undefined) return
             var propertyData = JSON.parse(pageInfo[i].parse.properties[0]["*"])[0].data
             for (var j in propertyData)
             {
@@ -353,6 +354,7 @@ Setting Object
     {
         if (type == 'properties')
         {
+            if (page.parse.properties[0] == undefined) return null
             var propertyData = JSON.parse(page.parse.properties[0]["*"])[0].data
             var data = propertyData.find((value) => {return value.data.source == dataPoint.location})
             if (data == null) {
