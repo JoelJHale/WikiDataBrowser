@@ -158,13 +158,13 @@
                 var row = document.createElement('tr')
                 var itemNameTH = document.createElement('th')
                 itemNameTH.className = 'itemColumn'
-                itemNameTH.innerHTML = itemName
+                itemNameTH.innerText = itemName
                 row.appendChild(itemNameTH)
                 for (var key in tableData)
                 {
                   var dataTD = document.createElement('td')
                   dataTD.className = tableData[key]
-                  dataTD.innerHTML = jsonData[itemName][tableData[key]]
+                  dataTD.innerText = jsonData[itemName][tableData[key]]
                   row.appendChild(dataTD)
                 }
                 items.push({...jsonData[itemName], rowPointer: row})
