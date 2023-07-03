@@ -168,6 +168,9 @@
                   row.appendChild(dataTD)
                 }
                 items.push({...jsonData[itemName], rowPointer: row})
+                row.addEventListener("click", (event)=>{
+                  event.currentTarget.classList.toggle("rowSelect")
+                })
                 table.append(row)
               }
               Loaded()

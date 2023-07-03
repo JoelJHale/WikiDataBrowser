@@ -7,7 +7,6 @@ html
 }
 html body{
   margin: 0;
-  border: 0;
   padding: 0;
   background-color:lightcyan;
   min-height: 100%;
@@ -68,16 +67,6 @@ main > h1 {
   top: 50%;
   transform: translate(-50%, -50%);
   text-shadow: 2px 2px 10px white;
-}
-
-table
-{
-  border-spacing: 0;
-}
-
-th, td {
-  border: 1px black solid;
-  padding: 5px;
 }
 
 .viewWindow {
@@ -153,4 +142,20 @@ div#main {
 
 .itemTable {
   background-image: linear-gradient(orchid, peachpuff);
+}
+
+table
+{
+  border-spacing: 0;
+}
+
+th, td {
+  border: 1px black solid;
+  padding: 5px;
+}
+
+.rowSelect
+{
+  outline: 3px yellow solid;
+  background-color: chartreuse;
 }
