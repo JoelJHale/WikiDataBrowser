@@ -37,24 +37,30 @@ Setting Object
                     <option value="Category">Category Listing</option>
                 </select>
                 <button onclick="LoadOptionStats(this)">Load Info</button><br>
-                <div class="dataPoint" id ="baseDataPoint">
-                    Data Name: <input type="text" id="displayName" onchange="SetDataPoint(this.parentNode)"><br>
-                    Location Of Data: <select id="dataLocationType" onchange="SetDataPoint(this.parentNode)">
-                        <option value="properties">Property</option>
-                        <option value="page_templates">Template</option>
-                    </select><br>
-                    Location: <input type="text" id="dataLocation" onchange="SetDataPoint(this.parentNode)" list="0"><br>
-                    Type of Data: <select id="dataType" onchange="SetDataPoint(this.parentNode)">
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="wrapped">Wrapped</option>
-                    </select><br>
-                    Required?: <input type="checkbox" id="dataRequired" checked onchange="SetDataPoint(this.parentNode)">
-                    Default Data Value: <input type="text" id="dataDefault" onchange="SetDataPoint(this.parentNode)"><br>
-                    <button onclick="RemoveDataOption(this)">Delete Data Point</button>
-                </div>
+                <table class="DataPointsTable">
+                    <thead><tr><th>Name</th><th>Location Type</th><th>Location</th><th>Data Type</th><th>Required/Default Value</th><th>Delete</th></tr></thead>
+                    <tbody>
+                        <tr class= "dataPoint" id="baseDataPoint">
+                        <td><input class="displayName" type="text" onchange="SetDataPoint(this)"></td>
+                        <td ><select class="dataLocationType" onchange="SetDataPoint(this)">
+                            <option value="properties">Property</option>
+                            <option value="page_templates">Template</option>
+                        </select></td>
+                        <td><input class="dataLocation" type="text" onchange="SetDataPoint(this)" list="0"></td>
+                        <td><select class="dataType" onchange="SetDataPoint(this)">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="wrapped">Wrapped</option>
+                        </select></td>
+                        <td><input type="checkbox" class="dataRequired" checked onchange="SetDataPoint(this)">
+                        <input type="text" class="dataDefault" onchange="SetDataPoint(this)"></td>
+                        <td><button onclick="RemoveDataOption(this)">XXX</button></td></tr>
+                    </tbody>
+                    <tfoot><tr><td colspan="6"><button onclick="AddDataOption(this)">Add Data</button></td></tr></tfoot>
+                </table>
+                <!-- <div class="dataPoint" id ="baseDataPoint">
+                </div> -->
                 <datalist id="0" class="dataList"></datalist>
-                <button onclick="AddDataOption(this)" style="display:block;">Add Data</button>
                 Pages To Search: <button onclick="ToggleList(this)">Expand</button>
                 <div id="pageList" class="pageList"></div>
                 <h3>Sample View</h3>
@@ -104,6 +110,18 @@ Setting Object
             
         }
     }
+    function DataToDataPoint(node)
+    {
+        return node.closest(".dataPoint")
+    }
+    function DataPointToOption(node)
+    {
+        return node.closest(".option")
+    }
+    function DataToOption(node)
+    {
+        return DataPointToOption(DataToDataPoint(node))
+    }
 
     function GenerateOptionData(parentBox, datapoints, id)
     {
@@ -120,12 +138,12 @@ Setting Object
                 }
                 siteSettings.EditDataPoint(id, "", data)
                 box.id = data.displayName
-                GetChildByID(box,'displayName').value = data.displayName
-                GetChildByID(box,'dataLocationType').value = dataType
-                GetChildByID(box,'dataLocation').value = data.location
-                GetChildByID(box,'dataRequired').checked = data.required
-                GetChildByID(box,'dataDefault').value = data.default
-                GetChildByID(box,'dataType').value = data.type
+                box.getElementsByClassName('displayName')[0].value = data.displayName
+                box.getElementsByClassName('dataLocationType')[0].value = dataType
+                box.getElementsByClassName('dataLocation')[0].value = data.location
+                box.getElementsByClassName('dataRequired')[0].checked = data.required
+                box.getElementsByClassName('dataDefault')[0].value = data.default
+                box.getElementsByClassName('dataType')[0].value = data.type
             }
         }
         UpdateTable(parentBox)
@@ -223,7 +241,7 @@ Setting Object
         GetChildByID(newSetting, '0').id = tableID+'propList'
         for (var i = 0; i < divList.length; i++)
         {
-            var elem = GetChildByID(divList[i], 'dataLocation')
+            var elem = divList[i].getElementsByClassName('dataLocation')[0]
             elem.setAttribute('list', tableID + 'propList')
         }
         tableID++
@@ -245,19 +263,19 @@ Setting Object
     }
     function RemoveDataOption(button)
     {
-        if (button.parentNode.id)
+        if (DataToDataPoint(button).id)
         {
-            siteSettings.RemoveOptionPoint(button.parentNode.parentNode.id,button.parentNode.id)
+            siteSettings.RemoveOptionPoint(DataToOption(button).id,DataToDataPoint(button).id)
         }
-        button.parentNode.remove()
+        DataToDataPoint(button).remove()
         UpdateAsideBox()
     }
     function AddDataOption(buttonPos)
     {
         var newPoint = dataPoint.cloneNode(true)
-        var dataList = buttonPos.parentNode.getElementsByClassName('dataList')[0]
-        GetChildByID(newPoint, 'dataLocation').setAttribute('list', dataList.id)
-        buttonPos.before(newPoint)
+        var dataList = DataPointToOption(buttonPos).getElementsByClassName('dataList')[0]
+        newPoint.getElementsByClassName('dataLocation')[0].setAttribute('list', dataList.id)
+        DataPointToOption(buttonPos).getElementsByClassName('DataPointsTable')[0].getElementsByTagName('tbody')[0].appendChild(newPoint)
         UpdateAsideBox()
         return newPoint
     }
@@ -427,14 +445,15 @@ Setting Object
 
     function SetDataPoint(inputBox)
     {
-        var OptionID = inputBox.parentNode.id
+        inputBox = DataToDataPoint(inputBox)
+        var OptionID = DataPointToOption(inputBox).id
         var oldid = inputBox.id
-        var newid = GetChildByID(inputBox,'displayName').value
-        var locationType = GetChildByID(inputBox,'dataLocationType').value
-        var location = GetChildByID(inputBox,'dataLocation').value
-        var required = GetChildByID(inputBox,'dataRequired').checked
-        var defaultVal = GetChildByID(inputBox,'dataDefault').value
-        var dataType = GetChildByID(inputBox,'dataType').value
+        var newid = inputBox.getElementsByClassName('displayName')[0].value
+        var locationType = inputBox.getElementsByClassName('dataLocationType')[0].value
+        var location = inputBox.getElementsByClassName('dataLocation')[0].value
+        var required = inputBox.getElementsByClassName('dataRequired')[0].checked
+        var defaultVal = inputBox.getElementsByClassName('dataDefault')[0].value
+        var dataType = inputBox.getElementsByClassName('dataType')[0].value
 
         siteSettings.EditDataPoint(OptionID, oldid, {
             displayName:newid,
@@ -445,7 +464,7 @@ Setting Object
             required:required
         })
         inputBox.id = newid
-        UpdateTable(inputBox.parentNode)
+        UpdateTable(DataPointToOption(inputBox))
         UpdateAsideBox()
     }
 

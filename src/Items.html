@@ -19,7 +19,9 @@
   </aside>
   <main>
     <h1 id = "siteHead"></h1>
-    <table id="itemTable" class="itemTable"></table>
+    <table id="itemTable" class="itemTable">
+      <thead></thead>
+    </table>
   </main>
   <script src="Loading.js"></script>
   <script>
@@ -142,7 +144,7 @@
                   sortOption.value = name
                   document.getElementById('sort').append(sortOption)
                 }
-                table.prepend(row)
+                table.getElementsByTagName('thead')[0].append(row)
               }
               SetStatus("Fetching Item Data")
               return
