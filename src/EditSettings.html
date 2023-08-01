@@ -41,19 +41,19 @@ Setting Object
                     <thead><tr><th>Name</th><th>Location Type</th><th>Location</th><th>Data Type</th><th>Required/Default Value</th><th>Delete</th></tr></thead>
                     <tbody>
                         <tr class= "dataPoint" id="baseDataPoint">
-                        <td><input class="displayName" type="text" onchange="SetDataPoint(this)"></td>
-                        <td ><select class="dataLocationType" onchange="SetDataPoint(this)">
+                        <td><input class="displayName data" type="text" onchange="SetDataPoint(this)"></td>
+                        <td ><select class="dataLocationType data" onchange="SetDataPoint(this)">
                             <option value="properties">Property</option>
                             <option value="page_templates">Template</option>
                         </select></td>
-                        <td><input class="dataLocation" type="text" onchange="SetDataPoint(this)" list="0"></td>
-                        <td><select class="dataType" onchange="SetDataPoint(this)">
+                        <td><input class="dataLocation data" type="text" onchange="SetDataPoint(this)" list="0"></td>
+                        <td><select class="dataType data" onchange="SetDataPoint(this)">
                             <option value="text">Text</option>
                             <option value="number">Number</option>
                             <option value="wrapped">Wrapped</option>
                         </select></td>
                         <td><input type="checkbox" class="dataRequired" checked onchange="SetDataPoint(this)">
-                        <input type="text" class="dataDefault" onchange="SetDataPoint(this)"></td>
+                        <input type="text" class="dataDefault data" onchange="SetDataPoint(this)" style="width: calc(85% - 20px);"></td>
                         <td><button onclick="RemoveDataOption(this)">XXX</button></td></tr>
                     </tbody>
                     <tfoot><tr><td colspan="6"><button onclick="AddDataOption(this)">Add Data</button></td></tr></tfoot>
@@ -64,7 +64,7 @@ Setting Object
                 Pages To Search: <button onclick="ToggleList(this)">Expand</button>
                 <div id="pageList" class="pageList"></div>
                 <h3>Sample View</h3>
-                <table id="tableView">
+                <table id="tableView" class="itemTable">
 
                 </table>
                 <button onclick="RemoveOption(this)" id="lastDataPoint">Delete Option</button>

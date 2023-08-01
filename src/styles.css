@@ -38,7 +38,7 @@ main > h1 {
 
 .mainPageLink {
   position: relative;
-  border: 2px rebeccapurple solid;
+  outline: 2px rebeccapurple solid;
   border-radius: 10px;
   margin: auto;
   text-align: center;
@@ -52,8 +52,7 @@ main > h1 {
 }
 
 .mainPageLink:hover {
-  min-height: 200px;
-  height: auto;
+  outline-width: 4px;
 }
 
 .mainPageLink img {
@@ -88,9 +87,12 @@ header{
   display: inline-block;
   color: black;
   background-color: white;
-  border: 1px black solid;
+  outline: 1px black solid;
   border-radius: 30px;
   margin: 5px;
+}
+.headerItem:hover{
+  outline-width: 2px;
 }
 
 .load
@@ -145,11 +147,30 @@ div#main {
 
 table
 {
+  table-layout: auto;
   border-spacing: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+thead th {
+  width: auto;
+  background-color: blueviolet;
+  position: sticky;
+  top: 0;
+}
+
+.searchFilter {
+  max-width: 75%;
+}
 th, td {
+  width: auto;
   border: 1px black solid;
+  word-break: break-all;
+  word-wrap: break-word;
+
+}
+.itemTable th,.itemTable td {
   padding: 5px;
 }
 
@@ -159,8 +180,40 @@ th, td {
   background-color: chartreuse;
 }
 
-thead th {
-  background-color: blueviolet;
-  position: sticky;
-  top: 0;
+.DataPointsTable
+{
+  table-layout: fixed;
 }
+.data {
+  box-sizing: border-box;
+  width: 85%;
+}
+
+/* Mobile specific for Items */
+@media (max-width: 600px) {
+  main {
+    width: 100%;
+    padding: 0;
+  }
+
+  .headerItem {
+    padding: 10px;
+    font-size: x-large;
+  }
+
+  main>h1 {
+    font-size: 2.5em;
+  }
+  
+  .viewWindow {
+    min-height: auto;
+    height: 40px;
+    width: 40px;
+    overflow: hidden;
+  }
+  .viewWindow:hover {
+    width: 100%;
+    height: auto;
+  }
+}
+
