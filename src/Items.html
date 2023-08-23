@@ -15,7 +15,8 @@
       <option value="none">None</option>
     </select>
     Ascending?<input onchange="SortChange()" type="checkbox" id="sortDirection">
-    <br><br>
+    <br>Show Selected<input onchange="FilterSelect()" type="checkbox" id="selectFilter">
+    <br>
   </aside>
   <main>
     <h1 id = "siteHead"></h1>
@@ -83,14 +84,31 @@
       aside.append(colName)
       aside.append(document.createElement("br"))
     }
-    var searchTerms = {}
-    function SearchBy(row, value)
+    var searchTerms = {selected: false, terms:{}}
+    function AddTerm(column, value)
     {
       value = value.toLowerCase()
+      searchTerms.terms[column] = value
+      FilterSearch()
+    }
+
+    function FilterSelect()
+    {
+      searchTerms.selected = document.getElementById("selectFilter").checked
+      FilterSearch()
+    }
+
+    function FilterSearch()
+    {
       for (var i = 0; i < items.length; i++)
       {
-        if (items[i][row].toString().toLowerCase().includes(value)) items[i].rowPointer.style.display = ""
-        else items[i].rowPointer.style.display = "none"
+        var matches = true
+        for (var column in searchTerms.terms)
+        {
+          matches = matches && items[i][column].toString().toLowerCase().includes(searchTerms.terms[column])
+        }
+        matches = matches && (!searchTerms.selected || items[i].rowPointer.classList.contains("rowSelect"))
+        items[i].rowPointer.style.display = matches ? "":"none"
       }
     }
 
@@ -99,7 +117,7 @@
       var search = document.createElement('input')
       search.type = 'text'
       search.placeholder = "search/filter"
-      search.addEventListener('change', ()=>{SearchBy(value, search.value)})
+      search.addEventListener('change', ()=>{AddTerm(value, search.value)})
       search.size = 6
       search.className = 'searchFilter'
       return search
