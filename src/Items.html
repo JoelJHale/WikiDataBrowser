@@ -146,7 +146,7 @@
                 for (var key in dataArray)
                 {
                   var name = dataArray[key].displayName
-                  tableData.push(name)
+                  tableData.push([name, dataArray[key].type])
                   var dataTH = document.createElement('th')
                   dataTH.className = name
                   dataTH.innerText = name
@@ -184,8 +184,18 @@
                 for (var key in tableData)
                 {
                   var dataTD = document.createElement('td')
-                  dataTD.className = tableData[key]
-                  dataTD.innerText = jsonData[itemName][tableData[key]]
+                  dataTD.className = tableData[key][0]
+                  if (tableData[key][1] != "image")
+                  {
+                    dataTD.innerText = jsonData[itemName][tableData[key][0]]
+                  }
+                  else
+                  {
+                    var img = document.createElement("img")
+                    img.className="itemImage"
+                    img.src=jsonData[itemName][tableData[key][0]]
+                    dataTD.appendChild(img)
+                  }
                   row.appendChild(dataTD)
                 }
                 items.push({...jsonData[itemName], rowPointer: row})

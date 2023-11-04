@@ -189,6 +189,11 @@ th, td {
   width: 85%;
 }
 
+.itemImage {
+  width: auto;
+  height: 5vh;
+}
+
 /* Mobile specific for Items */
 @media (max-width: 600px) {
   main {

@@ -51,6 +51,7 @@ Setting Object
                             <option value="text">Text</option>
                             <option value="number">Number</option>
                             <option value="wrapped">Wrapped</option>
+                            <option value="image">Image</option>
                         </select></td>
                         <td><input type="checkbox" class="dataRequired" checked onchange="SetDataPoint(this)">
                         <input type="text" class="dataDefault data" onchange="SetDataPoint(this)" style="width: calc(85% - 20px);"></td>
@@ -318,9 +319,10 @@ Setting Object
     
     class Types
     {
-        static number = "([0-9|\.|\,]+)" 
-        static text = "(.*)" 
-        static wrapped = ">(.*)<" 
+        static number = {format:"([0-9|\.|\,]+)", dataPath:"data", dataLoc:"value"} 
+        static text = {format:"(.*)", dataPath:"data", dataLoc:"value"}
+        static wrapped = {format:">(.*)<", dataPath:"data", dataLoc:"value"}
+        static image = {format:"(.*)", dataPath:"data.[0]", dataLoc:"url"}
     }
 
     function AddPropOptions(listElement, pageInfo)
@@ -332,6 +334,7 @@ Setting Object
             var propertyData = JSON.parse(pageInfo[i].parse.properties[0]["*"])[0].data
             for (var j in propertyData)
             {
+                console.log(propertyData)
                 if (!propList.includes(propertyData[j].data.source))
                 {
                     var optionNode = document.createElement('option')
@@ -373,15 +376,16 @@ Setting Object
         if (type == 'properties')
         {
             if (page.parse.properties[0] == undefined) return null
+            var TypeData=Types[dataPoint.type]
             var propertyData = JSON.parse(page.parse.properties[0]["*"])[0].data
-            var data = propertyData.find((value) => {return value.data.source == dataPoint.location})
+            console.log(propertyData)
+            var data = propertyData.find((value) => {return Path(value,TypeData.dataPath)?.source == dataPoint.location})
             if (data == null) {
                 if (dataPoint.required) return null
                 else return dataPoint.default
             }
-            
-            data = data.data.value.match(Types[dataPoint.type])[1]
-            if (dataPoint.type == 'number') data = Number.parseFloat(data.replace("\,\g",""))
+            data = Path(Path(data, TypeData.dataPath), TypeData.dataLoc).match(TypeData.format)[1]
+            if (dataPoint.type == 'number') data = Number.parseFloat(data.replace(",",""))
             return data
         }
         else if (type == 'page_templates')
@@ -486,6 +490,22 @@ Setting Object
                 else window.location.href = "Success.html";
             }
         ).finally(Loaded)
+    }
+
+    function Path(obj, path)
+    {
+        var recursive = obj
+        var indexs = path.split(".")
+        console.log(indexs)
+        for (var i in indexs)
+        {
+            console.log(recursive)
+            if (indexs[i].includes("[")) {
+                indexs[i] = Number.parseInt(indexs[i].replace("[","").replace("]",""))
+            }
+            recursive = recursive[indexs[i]]
+        }
+        return recursive
     }
   </script>
 </body>
