@@ -8,7 +8,7 @@
   <title>Item Info</title>
 </head>
 
-<body>
+<body class="classyPage">
   <script src="Header.js"></script>
   <main>
     <h1 id = "siteHead"></h1>
@@ -40,10 +40,10 @@
             if (keyCode != "Enter") return false
         }
         var response = answer.value
-        var match = items.find((value) => {if (value[0].toLowerCase() == response.toLowerCase() || value[0] == (response +" (Pet)").toLowerCase()) return value})
+        var match = items.find((value) => {if (value[0].toLowerCase() == response.toLowerCase() || value[0].toLowerCase() == (response +" (Pet)").toLowerCase()) return value})
         if (match)
         {
-            if (!found.find((value)=>{value[0] == match}))
+            if (!found.find((value)=>{return value == match}))
             {
                 found.push(match)
                 AddCorrectAnswer(match)
@@ -62,14 +62,14 @@
     function BlinkInput(color) {
         answer.blur()
         answer.style.border = "5px inset  "+color
-        setTimeout(()=>{answer.focus(); answer.style.border=""},1000)
+        setTimeout(()=>{answer.focus(); answer.style.border=""},500)
     }
 
     function AddCorrectAnswer(data)
     {
-        var div = document.createElement("div")
+        var div = document.createElement("span")
         div.innerHTML=data[0] + "<img height=30px src=\"" + data[1] + "\">"
-        document.getElementById("correctAnswers").append(div)
+        document.getElementById("correctAnswers").prepend(div)
     }
 
     function UpdateCorrect()

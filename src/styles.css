@@ -3,16 +3,16 @@
 }
 html
 {
-  min-height: 100%;
+  height: 100vh;
 }
 html body{
   margin: 0;
   padding: 0;
   background-color:lightcyan;
-  min-height: 100%;
+  height: 100vh;
 }
 .classyPage {
-  background-image: linear-gradient(aliceblue, gray);
+  background-image: linear-gradient(aliceblue, rgb(150, 150, 255));
 }
 main {
   margin: auto;
@@ -194,8 +194,10 @@ th, td {
   height: 30px;
 }
 
-#correctAnswers div {
-  border-top: 2px navy solid;
+#correctAnswers span {
+  line-break: strict;
+  white-space: nowrap;
+  border-left: 2px navy solid;
 }
 
 /* Mobile specific for Items */
