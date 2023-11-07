@@ -194,6 +194,10 @@ th, td {
   height: 30px;
 }
 
+#correctAnswers div {
+  border-top: 2px navy solid;
+}
+
 /* Mobile specific for Items */
 @media (max-width: 600px) {
   main {

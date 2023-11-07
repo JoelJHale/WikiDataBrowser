@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Item Info</title>
+</head>
+
+<body>
+  <script src="Header.js"></script>
+  <main>
+    <h1 id = "siteHead"></h1>
+    <input id="answer" type="text" size="20" style="height: 40px; font-size: 40px;" onkeydown="CheckAnswer(window.event)"><button onclick="CheckAnswer()" style="font-size: 40px;border: gray 2px solid; border-radius: 5px; cursor: pointer;">Submit</button>
+    <div id="correctAnswers" style="font-size: 30px; font-weight: bolder;"></div>
+  </main>
+  <script src="Loading.js"></script>
+  <script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const linkParam = urlParams.get('site');
+    const itemParam = urlParams.get('item');
+    const correct = new Audio()
+    correct.src = "./correct-choice-43861.mp3"
+    const wrong = new Audio()
+    wrong.src = "./wrong-answer-126515.mp3"
+    wrong.volume = 0.3
+    var answer = document.getElementById("answer")
+    var tableData = []
+    var found = []
+    var items = []
+
+    function CheckAnswer(e) {
+        if (e)
+        {
+            keyCode = e.key || e.code
+            if (keyCode != "Enter") return false
+        }
+        var response = answer.value
+        var match = items.find((value) => {if (value[0] == response || value[0] == response +" (Pet)") return value})
+        if (match)
+        {
+            if (!found.find((value)=>{value == match}))
+            {
+                found.push(match)
+                AddCorrectAnswer(match)
+            }
+            correct.play()
+            BlinkInput("green")
+            answer.value=""
+        }
+        else {
+            wrong.play()
+            BlinkInput("red")
+        }
+    }
+
+    function BlinkInput(color) {
+        answer.blur()
+        answer.style.border = "5px inset  "+color
+        setTimeout(()=>{answer.focus(); answer.style.border=""},1000)
+    }
+
+    function AddCorrectAnswer(data)
+    {
+        var div = document.createElement("div")
+        div.innerHTML=data[0] + "<img height=30px src=\"" + data[1] + "\">"
+        document.getElementById("correctAnswers").append(div)
+    }
+
+    StartLoading("Fetching Layout Information...")
+    fetch("https://createwikigatheringsettings.azurewebsites.net/api/ViewSettings?site="+linkParam).then(
+        result => result.json().then(
+            jsonData => {
+              SetStatus("Setting Up Layout")
+              var option = jsonData.options[itemParam]
+              document.getElementById("siteHead").innerText = "Can you name all " + jsonData.title + " " + itemParam + "?"
+              for (var data_type in option.array_data)
+              {
+                var dataArray = option.array_data[data_type]
+                for (var key in dataArray)
+                {
+                  var name = dataArray[key].displayName
+                  tableData.push([name, dataArray[key].type])
+                }
+              }
+              SetStatus("Fetching Item Data")
+              return
+            }
+        ))
+    .then(
+      fetch("https://createwikigatheringsettings.azurewebsites.net/api/GetItemData?site="+linkParam+"&item="+itemParam).then(
+        result => result.json().then(
+            jsonData => {
+              for (var itemName in jsonData)
+              {
+                SetStatus("Formatting Item Data")
+                for (var key in tableData)
+                {
+                }
+                items.push([itemName, jsonData[itemName].Image])
+              }
+              Loaded()
+            }
+        ))
+        )
+    
+  </script>
+</body>
+
+</html>
