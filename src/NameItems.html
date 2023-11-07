@@ -40,10 +40,10 @@
             if (keyCode != "Enter") return false
         }
         var response = answer.value
-        var match = items.find((value) => {if (value[0] == response || value[0] == response +" (Pet)") return value})
+        var match = items.find((value) => {if (value[0].toLowerCase() == response.toLowerCase() || value[0] == (response +" (Pet)").toLowerCase()) return value})
         if (match)
         {
-            if (!found.find((value)=>{value == match}))
+            if (!found.find((value)=>{value[0] == match}))
             {
                 found.push(match)
                 AddCorrectAnswer(match)
